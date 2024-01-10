@@ -17,7 +17,7 @@ server.get('/api/users', async (req, res) => {
         const users = await Users.find();
         res.status(200).json(users);
     } catch (err) {
-        res.status(500).json({ message: `The users information could not be retrieved`});
+        res.status(500).json({ message: `The users information could not be retrieved` });
     };
 })
 
@@ -27,7 +27,7 @@ server.get('/api/users/:id', async (req, res) => {
         const users = await Users.findById(id);
         if (!users) {
             res.status(404).json({ message: "The user with the specified ID does not exist" });
-        }else{
+        } else {
             res.status(200).json(users);
         }
     } catch (err) {
@@ -36,9 +36,35 @@ server.get('/api/users/:id', async (req, res) => {
 })
 
 server.post('/api/users', async (req, res) => {
-    try{
+    try {
+        const { name, bio } = req.body;
+        if (!name || !bio) {
+            res.status(400).json({ message: "Please provide name and bio for the user" });
+        } else {
+            const newUser = await Users.insert({ name, bio });
+            res.status(201).json(newUser);
+        }
+    } catch (err) {
+        res.status(500).json({ message: "There was an error while saving the user to the database" })
+    }
+})
 
-    }catch(err){
-        res.status(500).json({message: "There was an error while saving the user to the database"})
+server.put('/api/users/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, bio } = req.body;
+        if (!name || !bio) {
+            res.status(400).json({ message: "Please provide name and bio for the user" })
+        } else {
+            const updatedUser = await Users.update(id, { name, bio });
+            if (!updatedUser) {
+                res.status(404).json({ message: "The user with the specified ID does not exist" })
+            } else {
+                res.status(200).json(updatedUser);
+            }
+
+        }
+    } catch (err) {
+        res.status(500).json({ message: "The user information could not be modified" });
     }
 })
